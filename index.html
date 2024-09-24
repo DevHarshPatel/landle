@@ -1,0 +1,355 @@
+<html><head><base href="https://unpkg.com/globe.gl@2.28.3/dist/"/>
+<meta charset="utf-8">
+<title>Landle - Guess the Country Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #E3F2FD;
+    font-family: 'Rubik', sans-serif;
+  }
+  #globeContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  #gameTitle {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    font-weight: 900;
+    color: #FFFFFF;
+    background-color: #3498db;
+    z-index: 3;
+    padding: 10px 40px;
+    border-radius: 50px;
+    box-shadow: 0 4px 20px rgba(21, 101, 192, 0.3);
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+  #gameTitle:hover {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 6px 25px rgba(21, 101, 192, 0.4);
+  }
+  #authorCredit {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #FFFFFF;
+    background-color: #3498db;
+    z-index: 3;
+    padding: 8px 20px;
+    border-radius: 30px;
+    box-shadow: 0 2px 10px rgba(21, 101, 192, 0.2);
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+  #authorCredit:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(21, 101, 192, 0.3);
+  }
+  #guessContainer {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 2;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(21, 101, 192, 0.2);
+  }
+  #guessInput {
+    padding: 12px 15px;
+    font-size: 16px;
+    font-family: 'Rubik', sans-serif;
+    border: 2px solid #3498db;
+    border-radius: 25px;
+    outline: none;
+    transition: all 0.3s ease;
+    width: 250px;
+    margin-right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+  #guessInput:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 12px rgba(21, 101, 192, 0.5);
+  }
+  #guessButton {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 500;
+    color: white;
+    background-color: #3498db;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  #guessButton:hover {
+    background-color: #0D47A1;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+  #guessButton:disabled {
+    background-color: #90CAF9;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  #result {
+    margin-top: 15px;
+    font-weight: 500;
+    color: #2c3e50;
+  }
+  #triesLeft {
+    margin-top: 10px;
+    font-weight: 400;
+    color: #546E7A;
+  }
+  #countryDropdown {
+    position: absolute;
+    width: 250px;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #1565C0;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 4;
+  }
+  #countryDropdown div {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #countryDropdown div:hover {
+    background-color: #E3F2FD;
+  }
+  
+  @media (max-width: 600px) {
+    #gameTitle {
+      font-size: 36px;
+      padding: 8px 30px;
+      top: 10px;
+    }
+    #authorCredit {
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      padding: 6px 16px;
+    }
+    #guessButton {
+      padding: 12px 30px;
+      margin-top: 10px;
+    }
+    #guessInput {
+      width: calc(100% - 30px);
+      margin-right: 0;
+    }
+    #countryDropdown {
+      width: calc(100% - 30px);
+    }
+    #guessContainer {
+      width: 80%;
+      padding: 15px;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="globeContainer"></div>
+<div id="gameTitle">Landle</div>
+<div id="authorCredit">By Harsh Patel</div>
+<div id="guessContainer">
+  <input type="text" id="guessInput" placeholder="Guess the country" autocomplete="off">
+  <div id="countryDropdown"></div>
+  <button id="guessButton">Guess</button>
+  <div id="result"></div>
+  <div id="triesLeft"></div>
+</div>
+
+<script src="https://unpkg.com/globe.gl@2.28.3/dist/globe.gl.min.js"></script>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script>
+  const globe = Globe()
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+    .lineHoverPrecision(0)
+    .width(window.innerWidth)
+    .height(window.innerHeight)
+    (document.getElementById('globeContainer'));
+
+  let countries;
+  let targetCountry;
+  let triesLeft = 6;
+  let guessedCountries = [];
+
+  const guessInput = document.getElementById('guessInput');
+  const countryDropdown = document.getElementById('countryDropdown');
+  const guessButton = document.getElementById('guessButton');
+  const resultDiv = document.getElementById('result');
+  const triesLeftDiv = document.getElementById('triesLeft');
+
+  fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
+    .then(res => res.json())
+    .then(({ features }) => {
+      countries = features;
+      globe.polygonsData(countries)
+        .polygonAltitude(0.01)
+        .polygonCapColor(() => 'rgba(200, 200, 200, 0.3)')
+        .polygonSideColor(() => 'rgba(150, 150, 150, 0.8)')
+        .polygonStrokeColor(() => '#111')
+        .polygonLabel(({ properties: d }) => `
+          <b>${d.ADMIN} (${d.ISO_A2})</b>
+        `)
+        .onPolygonHover(hoverD => {
+          globe.polygonAltitude(d => {
+            if (d === hoverD) return 0.05;
+            if (guessedCountries.includes(d.properties.ADMIN)) return 0.05;
+            return 0.01;
+          })
+          .polygonCapColor(d => {
+            if (d === hoverD) return 'rgba(21, 101, 192, 0.8)';
+            if (guessedCountries.includes(d.properties.ADMIN)) return 'rgba(255, 165, 0, 0.8)';
+            return 'rgba(200, 200, 200, 0.3)';
+          });
+        });
+
+      selectRandomCountry();
+      setupCountryDropdown();
+    });
+
+  function selectRandomCountry() {
+    targetCountry = countries[Math.floor(Math.random() * countries.length)].properties;
+    console.log("Target country:", targetCountry.ADMIN);
+  }
+
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function setupCountryDropdown() {
+    const countryNames = countries.map(c => c.properties.ADMIN).sort();
+
+    guessInput.addEventListener('input', () => {
+      const inputValue = guessInput.value.toLowerCase();
+      const matchingCountries = countryNames.filter(country => 
+        country.toLowerCase().includes(inputValue)
+      );
+
+      countryDropdown.innerHTML = '';
+      matchingCountries.forEach(country => {
+        const div = document.createElement('div');
+        div.textContent = country;
+        div.addEventListener('click', () => {
+          guessInput.value = country;
+          countryDropdown.style.display = 'none';
+        });
+        countryDropdown.appendChild(div);
+      });
+
+      countryDropdown.style.display = matchingCountries.length > 0 ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', (event) => {
+      if (event.target !== guessInput) {
+        countryDropdown.style.display = 'none';
+      }
+    });
+  }
+
+  function highlightCountry(countryName) {
+    globe.polygonAltitude(d => {
+      if (d.properties.ADMIN === countryName || guessedCountries.includes(d.properties.ADMIN)) {
+        return 0.05;
+      }
+      return 0.01;
+    })
+    .polygonCapColor(d => {
+      if (d.properties.ADMIN === countryName) {
+        return 'rgba(255, 255, 0, 0.8)'; // Yellow for the current guess
+      } else if (guessedCountries.includes(d.properties.ADMIN)) {
+        return 'rgba(255, 165, 0, 0.8)'; // Orange for previously guessed countries
+      } else {
+        return 'rgba(200, 200, 200, 0.3)'; // Default color
+      }
+    });
+  }
+
+  guessButton.addEventListener('click', () => {
+    const guess = guessInput.value.trim();
+
+    if (triesLeft > 0) {
+      const guessedCountry = countries.find(c => c.properties.ADMIN.toLowerCase() === guess.toLowerCase());
+
+      if (!guessedCountry) {
+        resultDiv.textContent = "The country doesn't exist.";
+      } else if (guessedCountry.properties.ADMIN === targetCountry.ADMIN) {
+        resultDiv.textContent = `Congratulations! You guessed correctly: ${targetCountry.ADMIN}`;
+        highlightCountry(targetCountry.ADMIN);
+        triesLeft = 0;
+      } else {
+        const distance = calculateDistance(
+          guessedCountry.properties.LABEL_Y,
+          guessedCountry.properties.LABEL_X,
+          targetCountry.LABEL_Y,
+          targetCountry.LABEL_X
+        );
+        resultDiv.textContent = `Not correct. Distance to the target country: ${Math.round(distance)} km`;
+        triesLeft--;
+        guessedCountries.push(guessedCountry.properties.ADMIN);
+        highlightCountry(guessedCountry.properties.ADMIN);
+      }
+
+      if (triesLeft === 0 && guessedCountry.properties.ADMIN !== targetCountry.ADMIN) {
+        resultDiv.textContent += ` The correct country was ${targetCountry.ADMIN}.`;
+        highlightCountry(targetCountry.ADMIN);
+      }
+
+      triesLeftDiv.textContent = `Tries left: ${triesLeft}`;
+      guessInput.value = '';
+    }
+
+    if (triesLeft === 0) {
+      guessButton.disabled = true;
+      guessInput.disabled = true;
+    }
+  });
+
+  // Set initial camera position
+  globe.pointOfView({ lat: 0, lng: 0, altitude: 2.5 });
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    globe.width(window.innerWidth).height(window.innerHeight);
+  });
+</script>
+</body>
+</html>
