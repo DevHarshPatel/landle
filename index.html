@@ -28,7 +28,7 @@
     font-size: 48px;
     font-weight: 900;
     color: #FFFFFF;
-    background-color: #3498db;
+    background-color: #1565C0;
     z-index: 3;
     padding: 10px 40px;
     border-radius: 50px;
@@ -48,7 +48,7 @@
     font-size: 16px;
     font-weight: 500;
     color: #FFFFFF;
-    background-color: #3498db;
+    background-color: #1565C0;
     z-index: 3;
     padding: 8px 20px;
     border-radius: 30px;
@@ -68,18 +68,18 @@
     transform: translateX(-50%);
     text-align: center;
     z-index: 2;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.8);
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(21, 101, 192, 0.2);
   }
   #guessInput {
     padding: 12px 15px;
     font-size: 16px;
     font-family: 'Rubik', sans-serif;
-    border: 2px solid #3498db;
+    border: 2px solid #1565C0;
     border-radius: 25px;
     outline: none;
     transition: all 0.3s ease;
@@ -88,7 +88,7 @@
     background-color: rgba(255, 255, 255, 0.9);
   }
   #guessInput:focus {
-    border-color: #3498db;
+    border-color: #1565C0;
     box-shadow: 0 0 12px rgba(21, 101, 192, 0.5);
   }
   #guessButton {
@@ -97,7 +97,7 @@
     font-family: 'Rubik', sans-serif;
     font-weight: 500;
     color: white;
-    background-color: #3498db;
+    background-color: #1565C0;
     border: none;
     border-radius: 25px;
     cursor: pointer;
@@ -145,6 +145,38 @@
   #countryDropdown div:hover {
     background-color: #E3F2FD;
   }
+  #instructionOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  #instructionContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    max-width: 80%;
+    text-align: center;
+  }
+  #closeOverlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #1565C0;
+  }
+  #closeOverlay:hover {
+    color: #0D47A1;
+  }
   
   @media (max-width: 600px) {
     #gameTitle {
@@ -181,6 +213,12 @@
 <div id="globeContainer"></div>
 <div id="gameTitle">Landle</div>
 <div id="authorCredit">By Harsh Patel</div>
+<div id="instructionOverlay">
+  <div id="instructionContent">
+    <span id="closeOverlay">&times;</span>
+    <p>Click on a country to guess or just type it in!</p>
+  </div>
+</div>
 <div id="guessContainer">
   <input type="text" id="guessInput" placeholder="Guess the country" autocomplete="off">
   <div id="countryDropdown"></div>
@@ -209,6 +247,16 @@
   const guessButton = document.getElementById('guessButton');
   const resultDiv = document.getElementById('result');
   const triesLeftDiv = document.getElementById('triesLeft');
+  const instructionOverlay = document.getElementById('instructionOverlay');
+  const closeOverlay = document.getElementById('closeOverlay');
+
+  closeOverlay.addEventListener('click', () => {
+    instructionOverlay.style.display = 'none';
+  });
+
+  window.addEventListener('load', () => {
+    instructionOverlay.style.display = 'flex';
+  });
 
   fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
     .then(res => res.json())
@@ -233,6 +281,11 @@
             if (guessedCountries.includes(d.properties.ADMIN)) return 'rgba(255, 165, 0, 0.8)';
             return 'rgba(200, 200, 200, 0.3)';
           });
+        })
+        .onPolygonClick(clickedCountry => {
+          if (triesLeft > 0) {
+            guessInput.value = clickedCountry.properties.ADMIN;
+          }
         });
 
       selectRandomCountry();
@@ -303,9 +356,7 @@
     });
   }
 
-  guessButton.addEventListener('click', () => {
-    const guess = guessInput.value.trim();
-
+  function makeGuess(guess) {
     if (triesLeft > 0) {
       const guessedCountry = countries.find(c => c.properties.ADMIN.toLowerCase() === guess.toLowerCase());
 
@@ -340,6 +391,18 @@
     if (triesLeft === 0) {
       guessButton.disabled = true;
       guessInput.disabled = true;
+    }
+  }
+
+  guessButton.addEventListener('click', () => {
+    const guess = guessInput.value.trim();
+    makeGuess(guess);
+  });
+
+  guessInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+      const guess = guessInput.value.trim();
+      makeGuess(guess);
     }
   });
 
